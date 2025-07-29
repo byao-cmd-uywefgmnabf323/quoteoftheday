@@ -39,6 +39,46 @@ const quotes = [
     {
         quote: "Everything you've ever wanted is on the other side of fear.",
         author: "George Addair"
+    },
+    {
+        quote: "Life is what happens when you're busy making other plans.",
+        author: "John Lennon"
+    },
+    {
+        quote: "The way to get started is to quit talking and begin doing.",
+        author: "Walt Disney"
+    },
+    {
+        quote: "If life were predictable it would cease to be life, and be without flavor.",
+        author: "Eleanor Roosevelt"
+    },
+    {
+        quote: "Life is really simple, but we insist on making it complicated.",
+        author: "Confucius"
+    },
+    {
+        quote: "The purpose of our lives is to be happy.",
+        author: "Dalai Lama"
+    },
+    {
+        quote: "You only live once, but if you do it right, once is enough.",
+        author: "Mae West"
+    },
+    {
+        quote: "Never let the fear of striking out keep you from playing the game.",
+        author: "Babe Ruth"
+    },
+    {
+        quote: "Money and success don't change people; they merely amplify what is already there.",
+        author: "Will Smith"
+    },
+    {
+        quote: "Your time is limited, don't waste it living someone else's life.",
+        author: "Steve Jobs"
+    },
+    {
+        quote: "The journey of a thousand miles begins with one step.",
+        author: "Lao Tzu"
     }
 ];
 
@@ -77,12 +117,8 @@ function setTimeBasedBackground() {
 
 // Get a random quote
 function getRandomQuote() {
-    // Get today's date as a seed
-    const today = new Date().toDateString();
-    const seed = today.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    
-    // Use the seed to get a consistent quote for the day
-    const randomIndex = seed % quotes.length;
+    // Get a random quote from the array
+    const randomIndex = Math.floor(Math.random() * quotes.length);
     return quotes[randomIndex];
 }
 
@@ -105,28 +141,49 @@ function displayNewQuote() {
 }
 
 // Save quote as image
-async function saveQuoteAsImage() {
+function saveQuoteAsImage() {
+    // Create a temporary button to show save options
+    const quoteText = document.querySelector('.quote').textContent;
+    const authorText = document.querySelector('.author').textContent;
+    
+    // Create a temporary textarea to hold the quote
+    const textArea = document.createElement('textarea');
+    textArea.value = `${quoteText}\n${authorText}`;
+    document.body.appendChild(textArea);
+    
+    // Select the text
+    textArea.select();
+    
     try {
-        const quoteContainer = document.querySelector('.quote-container');
-        
-        // Use html2canvas to take a screenshot of the quote
-        const html2canvas = await import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js');
-        
-        const canvas = await html2canvas.default(quoteContainer, {
-            backgroundColor: null,
-            scale: 2, // For better quality on high-DPI displays
-            logging: false
-        });
-        
-        // Create download link
-        const link = document.createElement('a');
-        link.download = 'quote.png';
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-    } catch (error) {
-        console.error('Error saving quote as image:', error);
-        alert('Failed to save quote as image. Please try again.');
+        // Copy the text to clipboard
+        const successful = document.execCommand('copy');
+        if (successful) {
+            alert('Quote copied to clipboard! You can now paste it anywhere.');
+        } else {
+            // If copy fails, show the text to copy manually
+            const textToCopy = `${quoteText}\n${authorText}`;
+            prompt('Copy this quote:', textToCopy);
+        }
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+        const textToCopy = `${quoteText}\n${authorText}`;
+        prompt('Copy this quote:', textToCopy);
     }
+    
+    // Clean up
+    document.body.removeChild(textArea);
+    
+    // Alternative: Simple text file download
+    const data = `${quoteText}\n${authorText}`;
+    const blob = new Blob([data], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'quote.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }
 
 // Toggle theme
